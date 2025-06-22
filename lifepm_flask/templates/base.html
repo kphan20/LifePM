@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Life PM</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="static/styles.css">
+    </head>
+    <body>
+        <div><a href="{{ url_for('table_view') }}">View All</a></div>
+        <div><a href="{{ url_for('create') }}">Create</a></div>
+        <div><a href="{{ url_for('update_recurring') }}">Update</a></div>
+        {% block content %}{% endblock %}
+    </body>
+</html>

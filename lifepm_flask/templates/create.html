@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+Create Page
+{% if bad_submit %}
+<div>You messed up</div>
+{% endif %}
+<form method="post">
+    {{ form.csrf_token }}
+    <div>
+        {{ form.title.label }} {{ form.title(class="form-control") }}
+    </div>
+    <div>
+        {{ form.description.label }} {{ form.description(class="form-control") }}
+    </div>
+    <div>
+        {{ form.recurring_time.label }} {{ form.recurring_time(class="form-control") }}
+    </div>
+    <div>
+        {{ form.due_date.label }} {{ form.due_date(class="form-control") }}
+    </div>
+    <div>
+        {{ form.due_time.label }} {{ form.due_time(class="form-control") }}
+    </div>
+    <div>
+        {{ form.time_cost.label }} {{ form.time_cost(class="form-control") }}
+    </div>
+    <div>
+        {{ form.reminder.label }} {{ form.reminder(class="form-control") }}
+    </div>
+    <div>
+        {{ form.completed.label }} {{ form.completed(class="form-control") }}
+    </div>
+    {{ form.submit() }}
+</form>
+{% endblock %}

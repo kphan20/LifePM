@@ -1,0 +1,11 @@
+[project]
+name = "LifePM"
+version = "0.1.0"
+dependencies = [
+    "Flask",
+    "Flask-SQLAlchemy",
+    "flask-wtf"
+]
+
+[tool.setuptools]
+packages = ["lifepm_flask", "database"]
