@@ -18,7 +18,7 @@ def get_time_value(hours: int, mins: int):
     return time(hour=hours, minute=mins, tzinfo=ZoneInfo('America/New_York'))
 
 def get_task_str(task):
-    return f'Task Name: {task['title']}\nDue Date: {task['due_date']}\nTime Estimate: {task['time_cost']} minutes'
+    return f"Task Name: {task['title']}\nDue Date: {task['due_date']}\nTime Estimate: {task['time_cost']} minutes"
 
 # handle the response after the question
 async def handle_time_reply(update: Update, ctx: CallbackContext):
