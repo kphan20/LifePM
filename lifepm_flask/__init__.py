@@ -12,7 +12,7 @@ from datetime import date, timedelta
 from os import urandom
 from typing import List
 
-def OptionalUnless(fieldname, expected_value, msg):
+def OptionalUnless(fieldname, expected_value: str, msg):
     def _validator(form, field):
         other_field = form[fieldname]
         if other_field.data != expected_value and not field.data:
@@ -27,7 +27,7 @@ class TableRow(FlaskForm):
                                  choices=[(period.value, period.name.title()) for period in Interval],
                                  validators=[DataRequired()],
                                  default=Interval.NEVER.value)
-    due_date = DateField("Due Date", validators=[OptionalUnless('recurring_time', 0, 'Due Date required if recurring is set!')])
+    due_date = DateField("Due Date", validators=[OptionalUnless('recurring_time', '0', 'Due Date required if recurring is set!'), Optional()])
     due_time = TimeField("Due Time", validators=[Optional()])
     time_cost = IntegerField("Time Cost", validators=[DataRequired()])
     reminder = IntegerField("Reminder (Days)", default=0)
