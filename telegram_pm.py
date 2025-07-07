@@ -99,9 +99,31 @@ async def update_job_time(update: Update, ctx: CallbackContext):
     ctx.job_queue.run_daily(send_daily_message, time=get_time_value(hour, mins), chat_id=update.effective_message.chat_id, name=str(cfg['DAILY_JOB_ID']), )
     await ctx.bot.send_message(chat_id=ctx._chat_id, text="The daily time has been updated successfully (hopefully)!")
 
+async def send_site(update: Update, ctx: CallbackContext):
+    await ctx.bot.send_message(chat_id=ctx._chat_id, text=f"<a href={FLASK_URL}>Home Page</a>", parse_mode=ParseMode.HTML)
+
+COMMANDS = [
+    (CommandHandler("update_time", update_job_time, has_args=1), "Update the time the daily message is sent"),
+    (CommandHandler("send_site", send_site), "Send the link to the website")
+]
+
+async def send_help(update: Update, ctx: CallbackContext):
+    help_text = ""
+    for command_helper, command_txt in COMMANDS:
+        help_text += ', '.join(f"/{command_str}" for command_str in command_helper.commands)
+        help_text += f": {command_txt}\n"
+
+    await ctx.bot.send_message(chat_id=ctx._chat_id, text=help_text)
+
 app = ApplicationBuilder().token(cfg['TELEGRAM_TOKEN']).build()
 
-app.add_handler(CommandHandler("update_time", update_job_time, has_args=1))
+for command_helper, _ in COMMANDS:
+    app.add_handler(command_helper)
+
+# app.add_handler(CommandHandler("update_time", update_job_time, has_args=1))
+# app.add_handler(CommandHandler("send_site", send_site))
+
+app.add_handler(CommandHandler("help", send_help))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_time_reply)) # TODO potentially use filters.REPLY instead
 
 app.job_queue.run_daily(send_daily_message, time=get_time_value(8, 0), name=str(cfg['DAILY_JOB_ID']))
