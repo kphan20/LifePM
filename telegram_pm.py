@@ -100,7 +100,7 @@ async def update_job_time(update: Update, ctx: CallbackContext):
     await ctx.bot.send_message(chat_id=ctx._chat_id, text="The daily time has been updated successfully (hopefully)!")
 
 async def send_site(update: Update, ctx: CallbackContext):
-    await ctx.bot.send_message(chat_id=ctx._chat_id, text=escape(f"<a href={FLASK_URL}>Home Page</a>"), parse_mode=ParseMode.HTML)
+    await ctx.bot.send_message(chat_id=ctx._chat_id, text=f"<a href={escape(FLASK_URL)}>Home Page</a>", parse_mode=ParseMode.HTML)
 
 COMMANDS = [
     (CommandHandler("update_time", update_job_time, has_args=1), "Update the time the daily message is sent"),
