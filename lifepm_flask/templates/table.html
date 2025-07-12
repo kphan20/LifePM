@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <button id="filter_button" onclick="filterCompleted()">Filter Off</button>
+<button id="sort_duedate" onclick="sortTableByDueDate()">Sort Due Date</button>
 <table>
     <thead>
         <tr>
@@ -32,6 +33,7 @@
 </table>
 <script>
     let isFiltered = false;
+    let dueDateAscending = false;
     function filterCompleted() {
         const rows = document.querySelectorAll("#table_data tr");
         isFiltered = !isFiltered;
@@ -40,7 +42,40 @@
             row.style.display = isFiltered && (completedField.textContent.trim() === "True") ? 'none' : '';
         });
         const button = document.querySelector("#filter_button");
-        button.textContent = `Filter ${isFiltered ? "On" : "Off"}`
+        button.textContent = `Filter ${isFiltered ? "Off" : "On"}`
+    }
+    function sortTableByDueDate() {
+        const tbody = document.getElementById("table_data");
+        const rows = tbody.querySelectorAll("tr");
+        const rowArray = Array.from(rows);
+
+        dueDateAscending = !dueDateAscending;
+
+        rowArray.sort((a, b) => {
+            const aText = a.querySelector('[data-label="Due Date"]').textContent.trim();
+            const bText = b.querySelector('[data-label="Due Date"]').textContent.trim();
+
+            const aDate = Date.parse(aText);
+            const bDate = Date.parse(bText);
+
+            const aNan = isNaN(aDate);
+            const bNan = isNaN(bDate);
+
+            if (!aNan && !bNan) {
+                return dueDateAscending ? aDate - bDate : bDate - aDate;
+            }
+            else if (aNan && bNan) {
+                return 0;
+            }
+            else if (aNan) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        });
+
+        rowArray.forEach(row => tbody.appendChild(row));
     }
 </script>
 {% endblock %}

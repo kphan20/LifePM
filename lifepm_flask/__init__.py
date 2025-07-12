@@ -1,33 +1,40 @@
 from flask import Flask, render_template, redirect, url_for, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm, CSRFProtect
-from wtforms import IntegerField, StringField, SelectField, DateField, TimeField, BooleanField, DateTimeField, SubmitField
+from wtforms import IntegerField, StringField, SelectField, DateField, TimeField, BooleanField, DateTimeField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Optional, ValidationError
 from sqlalchemy import nulls_last, and_, or_
 
 from database.models import metadata, Task, Interval
 from database.db_handling import DB_URI
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from os import urandom
 from typing import List
+from calendar import monthrange
 
-def OptionalUnless(fieldname, expected_value: str, msg):
-    def _validator(form, field):
-        other_field = form[fieldname]
-        if other_field.data != expected_value and not field.data:
-            raise ValidationError(msg)
-    return _validator
+class NullableDateField(DateField):
+    def process_formdata(self, valuelist):
+        if not valuelist:
+            return
+
+        date_str = " ".join(valuelist)
+        for format in self.strptime_format:
+            try:
+                self.data = datetime.strptime(date_str, format).date()
+                return
+            except ValueError:
+                self.data = None
 
 class TableRow(FlaskForm):
     id = IntegerField("ID")
     title = StringField("Title", validators=[DataRequired()])
-    description = StringField("Description")
+    description = TextAreaField("Description")
     recurring_time = SelectField("Recurring Interval", 
                                  choices=[(period.value, period.name.title()) for period in Interval],
                                  validators=[DataRequired()],
                                  default=Interval.NEVER.value)
-    due_date = DateField("Due Date", validators=[OptionalUnless('recurring_time', '0', 'Due Date required if recurring is set!'), Optional()])
+    due_date = NullableDateField("Due Date")
     due_time = TimeField("Due Time", validators=[Optional()])
     time_cost = IntegerField("Time Cost", validators=[DataRequired()])
     reminder = IntegerField("Reminder (Days)", default=0)
@@ -35,6 +42,11 @@ class TableRow(FlaskForm):
     created = DateTimeField("Created Date")
     
     submit = SubmitField("Update")
+    
+    def validate_due_date(form, field):
+        other_field = form['recurring_time']
+        if other_field.data != '0' and not field.data:
+            raise ValidationError('Due Date required if recurring is set!')
 
 db = SQLAlchemy(metadata=metadata)
 app = Flask(__name__)

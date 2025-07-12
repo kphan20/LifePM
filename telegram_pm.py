@@ -20,14 +20,7 @@ def get_time_value(hours: int, mins: int):
 def get_task_str(task):
     return f"Task Name: {task['title']}\nDue Date: {task['due_date']}\nTime Estimate: {task['time_cost']} minutes"
 
-# handle the response after the question
-async def handle_time_reply(update: Update, ctx: CallbackContext):
-    text = update.message.text
-    if not text.isnumeric():
-        # TODO why is intellisense not working
-        await ctx.bot.send_message(chat_id=ctx._chat_id, text="Invalid number. Please enter a new time in minutes.")
-        return
-    mins = int(text)
+def get_tasks(mins: int):
     endpoint = f"{FLASK_URL}/get_daily/{mins}"
     with urllib.request.urlopen(endpoint) as res:
         json_dict = json.loads(res.read())
@@ -71,12 +64,32 @@ async def handle_time_reply(update: Update, ctx: CallbackContext):
                 due_str += f' at {hour}:{due_time.minute} {meridien}'
         due_str += '\n\n'
         msg_str += due_str
-        
+    
+    return msg_str
+
+# handle the response after the question
+async def handle_time_reply(update: Update, ctx: CallbackContext):
+    text = update.message.text
+    if not text.isnumeric():
+        # TODO why is intellisense not working
+        await ctx.bot.send_message(chat_id=ctx._chat_id, text="Invalid number. Please enter a new time in minutes.")
+        return
+    
+    msg_str = get_tasks(int(text))
     await ctx.bot.send_message(chat_id=ctx._chat_id, text=msg_str, parse_mode=ParseMode.HTML)
     
 # daily job to send the message
 async def send_daily_message(ctx: ContextTypes.DEFAULT_TYPE):
-    await ctx.bot.send_message(chat_id=ctx.job.chat_id, text="How much time for today (in minutes)?")
+    msg_str = get_tasks(30)
+    await ctx.bot.send_message(chat_id=ctx.job.chat_id, 
+                               text=f"Even if you don't send a message, here is a list of shit to do:\n{msg_str}", 
+                               parse_mode=ParseMode.HTML)
+    
+
+async def update_recurring(ctx: ContextTypes.DEFAULT_TYPE):
+    endpoint = f"{FLASK_URL}/update_recurring"
+    with urllib.request.urlopen(endpoint) as res:
+        print(res)
 
 # setting the time in which this app sends out the daily message
 async def update_job_time(update: Update, ctx: CallbackContext):
@@ -119,9 +132,6 @@ app = ApplicationBuilder().token(cfg['TELEGRAM_TOKEN']).build()
 
 for command_helper, _ in COMMANDS:
     app.add_handler(command_helper)
-
-# app.add_handler(CommandHandler("update_time", update_job_time, has_args=1))
-# app.add_handler(CommandHandler("send_site", send_site))
 
 app.add_handler(CommandHandler("help", send_help))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_time_reply)) # TODO potentially use filters.REPLY instead
