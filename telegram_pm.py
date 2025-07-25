@@ -137,5 +137,6 @@ app.add_handler(CommandHandler("help", send_help))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_time_reply)) # TODO potentially use filters.REPLY instead
 
 app.job_queue.run_daily(send_daily_message, time=get_time_value(8, 0), name=str(cfg['DAILY_JOB_ID']))
+app.job_queue.run_daily(update_recurring, time=get_time_value(0, 0), name=str(cfg['DAILY_JOB_ID']) + '1')
 
 app.run_polling(poll_interval=5.)
